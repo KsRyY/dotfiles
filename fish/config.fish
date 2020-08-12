@@ -5,7 +5,7 @@ set -x DOTFILES DOTFILES_PATH_PLACEHOLDER
 set -x fish_color_command green
 
 # initialize starship prompt if installed
-if command -v starship
+if command -v starship %> /dev/null
   starship init fish | source
 end
 
@@ -14,6 +14,8 @@ set -x EDITOR vim
 set -x VEDITOR code
 
 # run user defined scripts
-for script_path in (find $DOTFILES/user/scripts -iname "*.fish" -print0 | string split0)
+if [ -d $DOTFILES/user/scripts ]
+  for script_path in (find $DOTFILES/user/scripts -iname "*.fish" -print0 | string split0)
     source $script_path
+  end
 end
