@@ -21,15 +21,15 @@ function download
 
   if command -v wget
     if [ $_flag_verbose ]
-      wget -O $_flag_o -- $argv
+      wget -xO $_flag_o -- $argv
     else
-      wget -qO $_flag_o -- $argv
+      wget -xqO $_flag_o -- $argv
     end
   else if command -v curl
     if [ $_flag_verbose ]
-        curl -Lo $_flag_o $argv
+        curl --create-dirs -Lo $_flag_o $argv
     else
-        curl -sLo $_flag_o --create-dirs $argv -- $_flag_l
+        curl --create-dirs -sLo $_flag_o --create-dirs $argv -- $_flag_l
     end
   else
     echo 'No program avaliable for downloading found. Install either wget or curl to proceed. Exiting...'
