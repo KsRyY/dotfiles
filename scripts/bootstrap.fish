@@ -19,14 +19,14 @@ end
 function download
   argparse 'o/output=' -- $argv
 
-  if [ command -v wget ]
-    if [ $_flag_verbose ]
+  if command -v wget
+    if $_flag_verbose
       wget -O $_flag_o -- $argv
     else
       wget -qO $_flag_o -- $argv
     end
-  else if [ command -v curl ]
-    if [ $_flag_verbose ]
+  else if command -v curl
+    if $_flag_verbose
         curl -Lo $_flag_o $argv
     else
         curl -sLo $_flag_o --create-dirs $argv -- $_flag_l
@@ -38,7 +38,7 @@ function download
 end
 
 function log
-  if [ !$_flag_q ]
+  if !$_flag_q
     printf $argv
   end
 end
@@ -61,20 +61,20 @@ ln -s $DOTFILES/fish/config.fish $fish_config_dir/config.fish
 ln -s $DOTFILES/editorconfig/editorconfig $HOME/.editorconfig
 
 # node (use flag --china to configure china mirrors for npm/yarn)
-if [ command -v node ]
+if command -v node
   log 'Configuring NPM&Yarn...'
-  if [ $_flag_verbose ]
+  if $_flag_verbose
     npm install --verbose -g npm yarn
-  else if [ $_flag_q ]
+  else if $_flag_q
     npm install --silent -g npm yarn
   else
     npm install -g npm yarn
   end
 
-  if [ $_flag_china ]
-    if [ $_flag_verbose ]
+  if $_flag_china
+    if $_flag_verbose
       npm install --verbose -g mirror-config-china
-    else if [ $_flag_q ]
+    else if $_flag_q
       npm install --silent -g mirror-config-china
     else
       npm install -g mirror-config-china
