@@ -7,7 +7,7 @@ This is a collection of my dotfiles. They were all specifically tinkered for usa
 You need following tools to install the dotfiles:
 
   * Git for cloning the repository
-  * curl/wget downloading external scripts
+  * curl downloading external scripts (wget is unsupported due to minor problems)
   * fish for executing installation scripts
 
 All other things all optional, the installation script will automatically detect whether these tools are installed and configure them. There are also switches to turn them on and off regardless if they are installed or not.
