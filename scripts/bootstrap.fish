@@ -3,7 +3,7 @@
 # quick variables
 set fish_config_dir $HOME/.config/fish
 
-argparse --name 'bootstrap.fish' 'V/verbose' 'q/quiet' 'node' 'help' 'china' -- $argv
+argparse --name 'bootstrap.fish' 'V/verbose' 'q/quiet' 'n-node' 'h/help' 'c-china' -- $argv
 
 # print help
 function help
