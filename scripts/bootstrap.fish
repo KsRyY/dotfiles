@@ -19,17 +19,17 @@ end
 function download
   argparse 'o/output=' -- $argv
 
-  if command -v wget
-    if [ $_flag_verbose ]
-      wget -xO $_flag_o -- $argv
-    else
-      wget -xqO $_flag_o -- $argv
-    end
-  else if command -v curl
+  if command -v curl
     if [ $_flag_verbose ]
         curl --create-dirs -Lo $_flag_o $argv
     else
         curl --create-dirs -sLo $_flag_o --create-dirs $argv -- $_flag_l
+    end
+  else if command -v wget
+    if [ $_flag_verbose ]
+      wget -xO $_flag_o -- $argv
+    else
+      wget -xqO $_flag_o -- $argv
     end
   else
     echo 'No program avaliable for downloading found. Install either wget or curl to proceed. Exiting...'
