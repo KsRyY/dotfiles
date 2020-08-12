@@ -38,7 +38,7 @@ function download
 end
 
 function log
-  if !$_flag_q
+  if [ !$_flag_q ]
     printf $argv
   end
 end
