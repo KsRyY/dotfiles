@@ -45,6 +45,7 @@ if [ -e $fish_config_dir/functions/fisher.fish ]
     fisher self-update
   else
     fisher self-update %> /dev/null
+  end
 else
   download -o $fish_config_dir/functions/fisher.fish https://git.io/fisher
 end
