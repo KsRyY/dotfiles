@@ -54,6 +54,16 @@ ln -s $DOTFILES/fish/config.fish $fish_config_dir/config.fish
 # editorconfig
 ln -s $DOTFILES/editorconfig/editorconfig $HOME/.editorconfig
 
+# starship
+if command -v starship %> /dev/null
+  log 'Linking starship config...'
+  if [ -e $HOME/.config/starship.toml ]
+    log 'Found existing starship config, backing it up...'
+    mv $HOME/.config/starship.toml $HOME/.config/starship.toml.backup
+  end
+  ln -s $DOTFILES/starship/starship.toml $HOME/.config/starship.toml
+end
+
 # node (use flag --china to configure china mirrors for npm/yarn)
 if command -v node
   log 'Configuring NPM&Yarn...'
