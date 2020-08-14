@@ -88,7 +88,7 @@ if [ -e $HOME/.editorconfig ]
   log 'Found existing editorconfig, backing it up...'
   mv $HOME/.editorconfig $HOME/.editorconfig.backup
 end
-ln -s $DOTFILES/editorconfig/editorconfig $HOME/.editorconfig
+ln -s $DOTFILES/editorconfig/editorconfig.link $HOME/.editorconfig
 
 # starship
 if command -v starship %> /dev/null
