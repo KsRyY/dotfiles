@@ -59,7 +59,9 @@ end
 
 # link the fishfile and perform update
 log 'Updating fisher plugins...'
-if [ -e $fish_config_dir/fishfile ]
+if [ realpath $fish_config_dir/fishfile = '$DOTFILES/fish/fishfile' ]
+  log 'Found existing fishfile link pointing to the dotfiles provided version, skipping linking...'
+else if [ -e $fish_config_dir/fishfile ]
   log 'Found existing fishfile, backing it up...'
   cp $fish_config_dir/fishfile $fish_config_dir/fishfile.backup
 else
@@ -74,7 +76,9 @@ end
 # subsitute the DOTFILE_PATH_PLACEHOLDER in fish/config.fish to the real dotfiles path and link it
 log 'Linking fish config...'
 sed -n 's/DOTFILE_PATH_PLACEHOLDER/$DOTFILES/gp' $DOTFILES/fish/config.fish
-if [ -e $fish_config_dir/config.fish ]
+if [ realpath $fish_config_dir/config.fish = '$DOTFILES/fish/config.fish'
+  log 'Found existing config.fish link pointing to the dotfiles provided version, skipping linking...'
+else if [ -e $fish_config_dir/config.fish ]
   log 'Found existing fish config, backing it up...'
   mv $fish_config_dir/config.fish $fish_config_dir/config.fish.backup
 end
@@ -82,7 +86,9 @@ ln -s $DOTFILES/fish/config.fish $fish_config_dir/config.fish
 
 # editorconfig
 log 'Linking editorconfig...'
-if [ -e $HOME/.editorconfig ]
+if [ realpath $HOME/.editorconfig = '$DOTFILES/editorconfig/editorconfig.link' ]
+  log 'Found existing editorconfig link pointing to the dotfiles provided version, skipping linking...'
+else if [ -e $HOME/.editorconfig ]
   log 'Found existing editorconfig, backing it up...'
   mv $HOME/.editorconfig $HOME/.editorconfig.backup
 end
@@ -91,7 +97,9 @@ ln -s $DOTFILES/editorconfig/editorconfig.link $HOME/.editorconfig
 # starship
 if command -v starship %> /dev/null
   log 'Linking starship config...'
-  if [ -e $HOME/.config/starship.toml ]
+  if [ realpath $HOME/.config/starship.toml = '$DOTFILES/starship/starship.toml' ]
+    log 'Found existing fishfile link pointing to the dotfiles provided version, skipping linking...'
+  else if [ -e $HOME/.config/starship.toml ]
     log 'Found existing starship config, backing it up...'
     mv $HOME/.config/starship.toml $HOME/.config/starship.toml.backup
   end
