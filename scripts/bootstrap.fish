@@ -60,17 +60,8 @@ end
 # link the fishfile and perform update
 log 'Updating fisher plugins...'
 if [ -e $fish_config_dir/fishfile ]
-  log 'Found existing fishfile in your fish config directory. Installing the plugins with `fish install $plugin`.'
-  log 'In this circumstance, your fishfile will be preserved. The symbolic link will not be created.'
-  log 'That means, further changes to the fishfile will not apply to the one included here.'
-  log 'If you want them to sync, you will need to copy your fishfile here and manually link it back.'
-  for $plugin in cat $DOTFILES/fish/fishfile
-    if [ -n $_flag_V ]
-      fisher install $plugin
-    else
-      fisher install $plugin %> /dev/null
-    end
-  end
+  log 'Found existing fishfile, backing it up...'
+  cp $fish_config_dir/fishfile $fish_config_dir/fishfile.backup
 else
   ln -s $DOTFILES/fish/fishfile $fish_config_dir/fishfile
   if [ -n $_flag_V ]
