@@ -3,6 +3,12 @@
 # quick variables
 set fish_config_dir $HOME/.config/fish
 
+# detect if $DOTFILES is properly set
+if [ -z $DOTFILES ]
+  echo 'Please set the DOTFILES environement variable to the root of your dotfiles, or else this script won\'t work properly. Exiting...'
+  exit 1
+end
+
 argparse --name 'bootstrap.fish' 'V/verbose' 'q/quiet' 'n-node' 'h/help' 'c-china' -- $argv
 
 # print help
