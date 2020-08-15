@@ -27,6 +27,7 @@ function download
 
   if command -v curl %> /dev/null
     if [ $_flag_verbose ]
+    if [ -n $_flag_V ]
         curl --create-dirs -Lo $_flag_o $argv
     else
         curl --create-dirs -sLo $_flag_o --create-dirs $argv -- $_flag_l
