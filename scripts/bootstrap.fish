@@ -34,6 +34,7 @@ function download
     end
   else
     echo 'No program avaliable for downloading found. Install either wget or curl to proceed. Exiting...'
+    echo 'No program avaliable for downloading found. Install either curl to proceed. Exiting...'
     exit 1
   end
 end
