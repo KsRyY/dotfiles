@@ -40,6 +40,7 @@ end
 function log
   if [ -z $_flag_q ]
     printf $argv
+    printf '\n'
   end
 end
 
