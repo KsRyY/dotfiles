@@ -26,14 +26,12 @@ function download
   argparse 'o/output=' -- $argv
 
   if command -v curl %> /dev/null
-    if [ $_flag_verbose ]
     if [ -n $_flag_V ]
         curl --create-dirs -Lo $_flag_o $argv
     else
         curl --create-dirs -sLo $_flag_o --create-dirs $argv -- $_flag_l
     end
   else
-    echo 'No program avaliable for downloading found. Install either wget or curl to proceed. Exiting...'
     echo 'No program avaliable for downloading found. Install either curl to proceed. Exiting...'
     exit 1
   end
