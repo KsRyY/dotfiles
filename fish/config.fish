@@ -27,12 +27,6 @@ if [ -d $HOME/.pyenv ]
   status --is-interactive; and . (pyenv virtualenv-init -|psub)
 end
 
-# initialize nvs if installed
-if [ -d $HOME/.nvs ]
-  set -x NVS_HOME $HOME/.nvs
-  bass source $NVS_HOME/nvs.sh
-end
-
 # use proper CC/CXX complier
 if command -v clang %> /dev/null
   set -x CC clang
