@@ -19,3 +19,16 @@ if [ -d $DOTFILES/user/scripts ]
     source $script_path
   end
 end
+
+# initialize pyenv if installed
+if [ -d $HOME/.pyenv ]
+  set -x PATH "/home/andyc/.pyenv/bin" $PATH
+  status --is-interactive; and . (pyenv init -|psub)
+  status --is-interactive; and . (pyenv virtualenv-init -|psub)
+end
+
+# initialize nvs if installed
+if [ -d $HOME/.nvs ]
+  set -x NVS_HOME $HOME/.nvs
+  bass source $NVS_HOME/nvs.sh
+end
