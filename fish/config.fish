@@ -27,6 +27,9 @@ if [ -d $HOME/.pyenv ]
   status --is-interactive; and . (pyenv virtualenv-init -|psub)
 end
 
+# setup PATH
+set -x PATH $HOME/.local/bin $PATH
+
 # use proper CC/CXX complier
 if command -v clang %> /dev/null
   set -x CC clang
