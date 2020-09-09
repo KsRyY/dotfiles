@@ -1,133 +1,116 @@
-#! /bin/bash
+#!/bin/sh
+#
+# bootstrap installs things.
 
-# quick variables
-fish_config_dir=$HOME/.config/fish
+cd "$(dirname "$0")/.."
+DOTFILES_ROOT=$(pwd -P)
 
-# detect if $DOTFILES is properly set
-if [ [ -z $DOTFILES ] -o [ $DOTFILES = 'DOTFILES_PATH_PLACEHOLDER' ] ]
-  echo 'Please set the DOTFILES environement variable to the root of your dotfiles, or else this script won\'t work properly. Exiting...'
-  exit 1
-end
+set -e
 
-# switch to bash stuff later
-# argparse --name 'bootstrap.fish' 'V/verbose' 'q/quiet' 'n-node' 'h/help' 'c-china' -- $argv
+echo ''
 
-# print help
-function help() {
-  echo 'Usage: bootstrap.fish [OPTIONS]'
-  echo ''
-  echo 'Options:'
-  echo '  --china         Configure tools to use China mirrors if possible (npm/yarn, pyenv, pip)'
-  echo '  --help          Display this help message'
-  echo ''
+info() {
+	# shellcheck disable=SC2059
+	printf "\r  [ \033[00;34m..\033[0m ] $1\n"
 }
 
-# download files using either curl or wget
-function download() {
-  # bash stuff...
-  # argparse 'o/output=' -- $argv
-
-  if command -v curl %> /dev/null
-    if [ -n $_flag_V ]
-        curl --create-dirs -Lo $_flag_o $argv
-    elif
-        curl --create-dirs -sLo $_flag_o --create-dirs $argv -- $_flag_l
-    fi
-  else
-    echo 'No program avaliable for downloading found. Install either curl to proceed. Exiting...'
-    exit 1
-  fi
+user() {
+	# shellcheck disable=SC2059
+	printf "\r  [ \033[0;33m??\033[0m ] $1\n"
 }
 
-function log()
-  if [ -z $_flag_q ]
-    printf $argv
-    printf '\n'
-  fi
-fi
+success() {
+	# shellcheck disable=SC2059
+	printf "\r\033[2K  [ \033[00;32mOK\033[0m ] $1\n"
+}
 
-# install fisher
-log 'Installing fisher...'
-if [ -e $fish_config_dir/functions/fisher.fish ]
-  log 'fisher has been already installed on this machine, running fisher self update...'
-  if [ -n $_flag_V ]
-    fisher self-update
-  else
-    fisher self-update %> /dev/null
-  fi
+fail() {
+	# shellcheck disable=SC2059
+	printf "\r\033[2K  [\033[0;31mFAIL\033[0m] $1\n"
+	echo ''
+	exit
+}
+
+setup_gitconfig() {
+	info 'setup gitconfig'
+	# if there is no user.email, we'll assume it's a new machine/setup and ask it
+	if [ -z "$(git config --global --get user.email)" ]; then
+		user ' - What is your github author name?'
+		read -r user_name
+		user ' - What is your github author email?'
+		read -r user_email
+
+		git config --global user.name "$user_name"
+		git config --global user.email "$user_email"
+	elif [ "$(git config --global --get dotfiles.managed)" != "true" ]; then
+		# if user.email exists, let's check for dotfiles.managed config. If it is
+		# not true, we'll backup the gitconfig file and set previous user.email and
+		# user.name in the new one
+		user_name="$(git config --global --get user.name)"
+		user_email="$(git config --global --get user.email)"
+		mv ~/.gitconfig ~/.gitconfig.backup
+		success "moved ~/.gitconfig to ~/.gitconfig.backup"
+		git config --global user.name "$user_name"
+		git config --global user.email "$user_email"
+	else
+		# otherwise this gitconfig was already made by the dotfiles
+		info "already managed by dotfiles"
+	fi
+	# include the gitconfig.local file
+	git config --global include.path ~/.gitconfig.local
+	# finally make git knows this is a managed config already, preventing later
+	# overrides by this script
+	git config --global dotfiles.managed true
+	success 'gitconfig'
+}
+
+link_file() {
+	if [ -e "$2" ]; then
+		if [ "$(readlink "$2")" = "$1" ]; then
+			success "skipped $1"
+			return 0
+		else
+			mv "$2" "$2.backup"
+			success "moved $2 to $2.backup"
+		fi
+	fi
+	ln -sf "$1" "$2"
+	success "linked $1 to $2"
+}
+
+install_dotfiles() {
+	info 'installing dotfiles'
+	find -H "$DOTFILES_ROOT" -maxdepth 3 -name '*.symlink' -not -path '*.git*' |
+		while read -r src; do
+			dst="$HOME/.$(basename "${src%.*}")"
+			link_file "$src" "$dst"
+		done
+}
+
+find_zsh() {
+	if command -v zsh >/dev/null 2>&1 && grep "$(command -v zsh)" /etc/shells >/dev/null; then
+		command -v zsh
+	else
+		echo "/bin/zsh"
+	fi
+}
+
+setup_gitconfig
+install_dotfiles
+
+info "installing dependencies"
+if ./bin/dot_update; then
+	success "dependencies installed"
 else
-  download -o $fish_config_dir/functions/fisher.fish https://git.io/fisher
+	fail "error installing dependencies"
 fi
 
-# link the fishfile and perform update
-log 'Updating fisher plugins...'
-if [ (realpath $fish_config_dir/fishfile) = $DOTFILES/fish/fishfile ]
-  log 'Found existing fishfile link pointing to the dotfiles provided version, skipping linking...'
-elif [ -e $fish_config_dir/fishfile ]
-  log 'Found existing fishfile, backing it up...'
-  cp $fish_config_dir/fishfile $fish_config_dir/fishfile.backup
-else
-  ln -s $DOTFILES/fish/fishfile $fish_config_dir/fishfile
-  if [ -n $_flag_V ]
-    fisher
-  else
-    fisher %> /dev/null
-  fi
-fi
+zsh="$(find_zsh)"
+test -z "$TRAVIS_JOB_ID" &&
+	test "$(expr "$SHELL" : '.*/\(.*\)')" != "zsh" &&
+	command -v chsh >/dev/null 2>&1 &&
+	chsh -s "$zsh" &&
+	success "set $("$zsh" --version) at $zsh as default shell"
 
-# subsitute the DOTFILE_PATH_PLACEHOLDER in fish/config.fish to the real dotfiles path and link it
-log 'Linking fish config...'
-sed -n 's/DOTFILE_PATH_PLACEHOLDER/$DOTFILES/gp' $DOTFILES/fish/config.fish
-if [ (realpath $fish_config_dir/config.fish) = $DOTFILES/fish/config.fish ]
-  log 'Found existing config.fish link pointing to the dotfiles provided version, skipping linking...'
-elif [ -e $fish_config_dir/config.fish ]
-  log 'Found existing fish config, backing it up...'
-  mv $fish_config_dir/config.fish $fish_config_dir/config.fish.backup
-fi
-ln -s $DOTFILES/fish/config.fish $fish_config_dir/config.fish
-
-# editorconfig
-log 'Linking editorconfig...'
-if [ (realpath $HOME/.editorconfig) = $DOTFILES/editorconfig/editorconfig.link ]
-  log 'Found existing editorconfig link pointing to the dotfiles provided version, skipping linking...'
-elif [ -e $HOME/.editorconfig ]
-  log 'Found existing editorconfig, backing it up...'
-  mv $HOME/.editorconfig $HOME/.editorconfig.backup
-fi
-ln -s $DOTFILES/editorconfig/editorconfig.link $HOME/.editorconfig
-
-# starship
-if command -v starship %> /dev/null
-  log 'Linking starship config...'
-  if [ (realpath $HOME/.config/starship.toml) = $DOTFILES/starship/starship.toml ]
-    log 'Found existing fishfile link pointing to the dotfiles provided version, skipping linking...'
-  elif [ -e $HOME/.config/starship.toml ]
-    log 'Found existing starship config, backing it up...'
-    mv $HOME/.config/starship.toml $HOME/.config/starship.toml.backup
-  fi
-  ln -s $DOTFILES/starship/starship.toml $HOME/.config/starship.toml
-fi
-
-# node (use flag --china to configure china mirrors for npm/yarn)
-if command -v node %> /dev/null
-  log 'Configuring NPM&Yarn...'
-  if [ -n $_flag_V ]
-    npm install --verbose -g npm yarn
-  elif [ -n $_flag_q ]
-    npm install --silent -g npm yarn
-  else
-    npm install -g npm yarn
-  fi
-
-  if [ -n $_flag_china ]
-    if [ -n $_flag_V ]
-      npm install --verbose -g mirror-config-china
-    elif [ -n $_flag_q ]
-      npm install --silent -g mirror-config-china
-    else
-      npm install -g mirror-config-china
-    fi
-  fi
-fi
-
-exit 0
+echo ''
+echo '  All installed!'

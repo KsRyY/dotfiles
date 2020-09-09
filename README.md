@@ -33,3 +33,6 @@ To view all options of the bootstrap script, run this:
 
 For a full list of dotfiles included and how they work, head to [DOTFILES.md](./DOTFILES.md)
 
+## Credits
+
+- [Carlos Alexandro Becker](https://github.com/caarlos0) I took some code from his [dotfiles](https://github.com/caarlos0/dotfiles) and made some minor changes.
